@@ -10,12 +10,10 @@
 #define MAJOR_NUMBER 61
  
 /* forward declaration */
-int onebyte_open(struct inode *inode, struct file *filep);
-int onebyte_release(struct inode *inode, struct file *filep);
-ssize_t onebyte_read(struct file *filep, char *buf, size_t
-count, loff_t *f_pos);
-ssize_t onebyte_write(struct file *filep, const char *buf,
-size_t count, loff_t *f_pos);
+static int onebyte_open(struct inode *inode, struct file *filep);
+static int onebyte_release(struct inode *inode, struct file *filep);
+static ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos);
+static ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos);
 static void onebyte_exit(void);
 /* definition of file_operation structure */
 struct file_operations onebyte_fops = {
@@ -24,26 +22,43 @@ struct file_operations onebyte_fops = {
      open:     onebyte_open,
      release: onebyte_release
 };
-char *onebyte_data = NULL;
+static char *onebyte_data = NULL;
 
-int onebyte_open(struct inode *inode, struct file *filep)
+static int onebyte_open(struct inode *inode, struct file *filep)
 {
      return 0; // always successful
 }
 
-int onebyte_release(struct inode *inode, struct file *filep)
+static int onebyte_release(struct inode *inode, struct file *filep)
 {
      return 0; // always successful
 }
 
-ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
+static ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 {    /*please complete the function on your own*/
 
+    if(copy_to_user(buf, onebyte_data, 1))
+    {
+        count = -EFAULT;
+    }
+    *f_pos = *f_pos + 1;
+    if(*f_pos > 1)
+    {
+        return 0;
+    }
+    printk(KERN_ALERT "this count is %d", count);
+    return count;
 }
 
-ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos)
+static ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos)
 {
      /*please complete the function on your own*/
+     if(copy_from_user(onebyte_data, buf, 1))
+     {
+         return -EFAULT;
+     }
+
+     return count;
 }
 
 static int onebyte_init(void)
@@ -63,7 +78,7 @@ static int onebyte_init(void)
           onebyte_exit();
           // cannot allocate memory
           // return no memory error, negative signify a
-     failure
+     failure:
          return -ENOMEM;
      }
      // initialize the value to be X

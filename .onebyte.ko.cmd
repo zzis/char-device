@@ -1,0 +1,1 @@
+cmd_/root/os/assignment3/char_device/onebyte.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /root/os/assignment3/char_device/onebyte.ko /root/os/assignment3/char_device/onebyte.o /root/os/assignment3/char_device/onebyte.mod.o
