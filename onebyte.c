@@ -41,24 +41,29 @@ static ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t 
     {
         count = -EFAULT;
     }
-    *f_pos = *f_pos + 1;
+    *f_pos += 1;
     if(*f_pos > 1)
     {
         return 0;
     }
-    printk(KERN_ALERT "this count is %d", count);
-    return count;
+    return 1;
 }
 
 static ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos)
 {
      /*please complete the function on your own*/
-     if(copy_from_user(onebyte_data, buf, 1))
-     {
-         return -EFAULT;
+     if(*f_pos == 0) {
+         if(copy_from_user(onebyte_data, buf, 1))
+         {
+             return -EFAULT;
+         }
+         *f_pos += 1;
+         return 1;
+     } else {
+         //here should print error mesg
+         // ENOSPC      28  is defined in error.h means /* No space left on device */
+        return -ENOSPC;
      }
-
-     return count;
 }
 
 static int onebyte_init(void)
