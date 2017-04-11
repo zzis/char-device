@@ -18,7 +18,8 @@ static int onebyte_release(struct inode *inode, struct file *filep);
 static ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos);
 static ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos);
 static void onebyte_exit(void);
-static int onebyte_llseek(unsigned int fd, unsigned long offset_high, unsigned long offset_low, loff_t *result, unsigned int whence);
+// static int onebyte_llseek(unsigned int fd, unsigned long offset_high, unsigned long offset_low, loff_t *result, unsigned int whence);
+static loff_t onebyte_llseek(struct file *filp, loff_t offset, int whence)  
 /* definition of file_operation structure */
 struct file_operations onebyte_fops = {
      .llseek =   onebyte_llseek,
@@ -108,32 +109,59 @@ static ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, 
 
 }
 
-static int onebyte_llseek(unsigned int fd, unsigned long offset_high, unsigned long offset_low, loff_t *result, unsigned int whence){
-    loff_t offset = (loff_t) offset_high << 32 | offset_low;
+static loff_t onebyte_llseek(struct file *filp, loff_t offset, int whence)  
+{  
     loff_t newpos;  
-
+  
     switch(whence) {  
       case 0: /* SEEK_SET */  
         newpos = offset;  
         break;  
   
       case 1: /* SEEK_CUR */  
-        newpos = position + offset;  
+        newpos = filp->f_pos + offset;  
         break;  
   
       case 2: /* SEEK_END */  
-        newpos = DEVICE_SIZE - 1 + offset;  
+        newpos = MEMDEV_SIZE -1 + offset;  
         break;  
   
       default: /* can't happen */  
         return -EINVAL;  
     }  
-    if ((newpos < 0) || (newpos > DEVICE_SIZE))  
+    if ((newpos<0) || (newpos>MEMDEV_SIZE))  
         return -EINVAL;  
   
-    *result = newpos;  
+    filp->f_pos = newpos;  
     return newpos;  
 }
+
+// static int onebyte_llseek(unsigned int fd, unsigned long offset_high, unsigned long offset_low, loff_t *result, unsigned int whence){
+//     loff_t offset = (loff_t) offset_high << 32 | offset_low;
+//     loff_t newpos;  
+
+//     switch(whence) {  
+//       case 0: /* SEEK_SET */  
+//         newpos = offset;  
+//         break;  
+  
+//       case 1: /* SEEK_CUR */  
+//         newpos = position + offset;  
+//         break;  
+  
+//       case 2: /* SEEK_END */  
+//         newpos = DEVICE_SIZE - 1 + offset;  
+//         break;  
+  
+//       default: /* can't happen */  
+//         return -EINVAL;  
+//     }  
+//     if ((newpos < 0) || (newpos > DEVICE_SIZE))  
+//         return -EINVAL;  
+  
+//     *result = newpos;  
+//     return newpos;  
+// }
 
 static int onebyte_init(void)
 {
