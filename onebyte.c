@@ -96,6 +96,9 @@ static ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, 
     }
 
     *f_pos += count;
+
+    printk(KERN_ALERT "The writen size is %d", *f_pos);
+
     return count;
 
 }
