@@ -123,13 +123,13 @@ static loff_t onebyte_llseek(struct file *filp, loff_t offset, int whence)
         break;  
   
       case 2: /* SEEK_END */  
-        newpos = MEMDEV_SIZE -1 + offset;  
+        newpos = DEVICE_SIZE -1 + offset;  
         break;  
   
       default: /* can't happen */  
         return -EINVAL;  
     }  
-    if ((newpos<0) || (newpos>MEMDEV_SIZE))  
+    if ((newpos<0) || (newpos>DEVICE_SIZE))  
         return -EINVAL;  
   
     filp->f_pos = newpos;  
