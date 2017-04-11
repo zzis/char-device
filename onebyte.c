@@ -8,9 +8,13 @@
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
 #include <linux/file.h>
+#include <linux/ioctl.h>
 #define MAJOR_NUMBER 61
 
 #define DEVICE_SIZE 4 * 1024 * 1024
+#define SCULL_IOC_MAGIC 'k'
+#define SCULL_HELLO _IO(SCULL_IOC_MAGIC, 1)
+#define SCULL_IOC_MAXNR 1
  
 /* forward declaration */
 static int onebyte_open(struct inode *inode, struct file *filep);
@@ -20,6 +24,7 @@ static ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, 
 static void onebyte_exit(void);
 // static int onebyte_llseek(unsigned int fd, unsigned long offset_high, unsigned long offset_low, loff_t *result, unsigned int whence);
 static loff_t onebyte_llseek(struct file *filp, loff_t offset, int whence);
+long onebyte_ioctl(struct file *filp, unsigned int cmd, unsigned long arg); 
 /* definition of file_operation structure */
 struct file_operations onebyte_fops = {
      llseek :   onebyte_llseek,
@@ -27,6 +32,7 @@ struct file_operations onebyte_fops = {
      write :    onebyte_write,
      open :     onebyte_open,
      release : onebyte_release,
+     ioctl : onebyte_ioctl,
 };
 static char *onebyte_data = NULL;
 static loff_t position;
@@ -134,6 +140,30 @@ static loff_t onebyte_llseek(struct file *filp, loff_t offset, int whence)
   
     filp->f_pos = newpos;  
     return newpos;  
+}
+
+long onebyte_ioctl(struct file *filp, unsigned int cmd, unsigned long arg){
+    int err = 0, tmp;
+    int retval = 0;
+
+    if(_IOC_TYPE(cmd) != SCULL_IOC_MAGIC) return -ENOTTY;
+    if(_IOC_NR(cmd) > SCULL_IOC_MAXNR) return -ENOTTY;
+
+    if (_IOC_DIR(cmd) & _IOC_READ)
+        err = !access_ok(VERIFY_WRITE, (void *)arg, _IOC_SIZE(cmd));
+    else if (_IOC_DIR(cmd) & _IOC_WRITE)
+        err = !access_ok(VERIFY_READ, (void *)arg, _IOC_SIZE(cmd));
+    if (err) 
+        return -EFAULT;
+
+    switch(cmd){
+        case SCULL_HELLO:
+            printk(KERN_WARNING "hello from ioctl\n");
+            break;
+        default:
+            return -ENOTTY;
+    }
+    return retval;
 }
 
 // static int onebyte_llseek(unsigned int fd, unsigned long offset_high, unsigned long offset_low, loff_t *result, unsigned int whence){
