@@ -19,7 +19,7 @@ static ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t 
 static ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos);
 static void onebyte_exit(void);
 // static int onebyte_llseek(unsigned int fd, unsigned long offset_high, unsigned long offset_low, loff_t *result, unsigned int whence);
-static loff_t onebyte_llseek(struct file *filp, loff_t offset, int whence)  
+static loff_t onebyte_llseek(struct file *filp, loff_t offset, int whence);
 /* definition of file_operation structure */
 struct file_operations onebyte_fops = {
      llseek :   onebyte_llseek,
