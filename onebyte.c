@@ -32,7 +32,7 @@ struct file_operations onebyte_fops = {
      write :    onebyte_write,
      open :     onebyte_open,
      release : onebyte_release,
-     ioctl : onebyte_ioctl,
+     unlocked_ioctl : onebyte_ioctl,
 };
 static char *onebyte_data = NULL;
 static loff_t position;
