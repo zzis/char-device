@@ -63,7 +63,7 @@ static ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t 
         return -EFAULT;
     }
 
-    *f_pos = *_pos + count;
+    *f_pos = *f_pos + count;
     return count;
 }
 
