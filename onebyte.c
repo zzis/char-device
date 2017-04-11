@@ -17,8 +17,10 @@ static int onebyte_release(struct inode *inode, struct file *filep);
 static ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos);
 static ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos);
 static void onebyte_exit(void);
+static int onebyte_llseek(unsigned int fd, unsigned long offset_high, unsigned long offset_low, loff_t *result, unsigned int whence);
 /* definition of file_operation structure */
 struct file_operations onebyte_fops = {
+     llseek:   onebyte_llseek,
      read:     onebyte_read,
      write:    onebyte_write,
      open:     onebyte_open,
@@ -97,10 +99,42 @@ static ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, 
 
     *f_pos += count;
 
-    printk(KERN_ALERT "The writen size is %d", *f_pos);
+    //print the size written
+    // printk(KERN_ALERT "The writen size is %d", *f_pos);
 
     return count;
 
+}
+
+static int onebyte_llseek(unsigned int fd, unsigned long offset_high, unsigned long offset_low, loff_t *result, unsigned int whence){
+    loff_t offset = (loff_t) offset_high << 32 | offset_low;
+    loff_t newpos;  
+
+    struct fd file = fdget(fd);
+    if(!file){
+        return -EBADF;
+    }
+    switch(whence) {  
+      case 0: /* SEEK_SET */  
+        newpos = offset;  
+        break;  
+  
+      case 1: /* SEEK_CUR */  
+        newpos = file->f_pos + offset;  
+        break;  
+  
+      case 2: /* SEEK_END */  
+        newpos = DEVICE_SIZE - 1 + offset;  
+        break;  
+  
+      default: /* can't happen */  
+        return -EINVAL;  
+    }  
+    if ((newpos < 0) || (newpos > DEVICE_SIZE))  
+        return -EINVAL;  
+  
+    file->f_pos = newpos;  
+    return newpos;  
 }
 
 static int onebyte_init(void)

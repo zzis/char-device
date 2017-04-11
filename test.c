@@ -30,9 +30,9 @@ void initial(char i) {
 }
 
 int main(int argc, char **argv) {
-    lcd = open("/dev/lcd", O_RDWR); 
+    lcd = open("/dev/onebyte", O_RDWR); 
     if (lcd == ‐1) {
-        printk("unable to open lcd");
+        printk("unable to open onebyte");
         exit(EXIT_FAILURE); 
     }
     initial(‘1’); 
