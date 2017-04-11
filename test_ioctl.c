@@ -9,6 +9,7 @@
 #define SCULL_HELLO _IO(SCULL_IOC_MAGIC, 1)
 #define SET_DEV_MSG _IOW(SCULL_IOC_MAGIC, 2, char*)
 #define GET_DEV_MSG _IOR(SCULL_IOC_MAGIC, 3, char*)
+#define WR_DEV_MSG _IOWR(SCULL_IOC_MAGIC, 4, char*)
 
 int lcd;
 void test() 

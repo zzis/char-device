@@ -16,7 +16,8 @@
 #define SCULL_HELLO _IO(SCULL_IOC_MAGIC, 1)
 #define SET_DEV_MSG _IOW(SCULL_IOC_MAGIC, 2, char*)
 #define GET_DEV_MSG _IOR(SCULL_IOC_MAGIC, 3, char*)
-#define SCULL_IOC_MAXNR 3
+#define WR_DEV_MSG _IOWR(SCULL_IOC_MAGIC, 4, char*)
+#define SCULL_IOC_MAXNR 4
 
 #define DEV_MSG_SIZE 60
  
@@ -175,6 +176,14 @@ long onebyte_ioctl(struct file *filp, unsigned int cmd, unsigned long arg){
             }
             printk(KERN_ALERT "get dev msg: %s", dev_msg);
             break;
+        case WR_DEV_MSG:
+            char *tmp = kmalloc(DEV_MSG_SIZE, GFP_KERNEL);
+            if(copy_from_user(dev_msg, (char *)arg,  DEV_MSG_SIZE)){
+                return -EFAULT;
+            }
+            if(copy_to_user((char *)arg, dev_msg, DEV_MSG_SIZE)){
+                return -EFAULT;
+            }
         default:
             return -ENOTTY;
     }
