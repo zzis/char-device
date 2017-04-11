@@ -33,13 +33,15 @@ void test()
         printf("malloc error\n");
         return ;
     }
-    if(k = ioctl(lcd, GET_DEV_MSG, user_msg)){
+    char *user_msg_tmp = (char *)malloc(60);
+    if(k = ioctl(lcd, GET_DEV_MSG, user_msg_tmp)){
         printf("_IOR ioctl get msg fail\n");
         return ;
     }
-    printf("_IOR user_msg is: %s \n", user_msg);
+    printf("_IOR user_msg is: %s \n", user_msg_tmp);
+    free(user_msg_tmp);
 
-    char new_user_msg = "This is new message!\n";
+    char *new_user_msg = "This is new message!\n";
     strcpy(user_msg, new_user_msg);
     if(k = ioctl(lcd, WR_DEV_MSG, user_msg)){
         printf("_IOWR ioctl get msg fail\n");
