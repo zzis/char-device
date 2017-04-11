@@ -22,11 +22,11 @@ static void onebyte_exit(void);
 static loff_t onebyte_llseek(struct file *filp, loff_t offset, int whence)  
 /* definition of file_operation structure */
 struct file_operations onebyte_fops = {
-     .llseek =   onebyte_llseek,
-     .read =     onebyte_read,
-     .write =    onebyte_write,
-     .open =     onebyte_open,
-     .release = onebyte_release,
+     llseek :   onebyte_llseek,
+     read :     onebyte_read,
+     write :    onebyte_write,
+     open :     onebyte_open,
+     release : onebyte_release,
 };
 static char *onebyte_data = NULL;
 static loff_t position;
