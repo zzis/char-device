@@ -14,7 +14,11 @@
 #define DEVICE_SIZE 4 * 1024 * 1024
 #define SCULL_IOC_MAGIC 'k'
 #define SCULL_HELLO _IO(SCULL_IOC_MAGIC, 1)
-#define SCULL_IOC_MAXNR 1
+#define SET_DEV_MSG _IOW(SCULL_IOC_MAGIC, 2, *char)
+#define GET_DEV_MSG _IOR(SCULL_IOC_MAGIC, 3, *char)
+#define SCULL_IOC_MAXNR 3
+
+#define DEV_MSG_SIZE
  
 /* forward declaration */
 static int onebyte_open(struct inode *inode, struct file *filep);
@@ -35,7 +39,8 @@ struct file_operations onebyte_fops = {
      unlocked_ioctl : onebyte_ioctl,
 };
 static char *onebyte_data = NULL;
-static loff_t position;
+static char *dev_msg = NULL;
+
 
 static int onebyte_open(struct inode *inode, struct file *filep)
 {
@@ -74,7 +79,6 @@ static ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t 
     }
 
     *f_pos = *f_pos + count;
-    position = *f_pos;
     return count;
 }
 
@@ -107,7 +111,6 @@ static ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, 
     }
 
     *f_pos += count;
-    position = *f_pos;
     //print the size written
     // printk(KERN_ALERT "The writen size is %d", *f_pos);
 
@@ -160,38 +163,24 @@ long onebyte_ioctl(struct file *filp, unsigned int cmd, unsigned long arg){
         case SCULL_HELLO:
             printk(KERN_WARNING "hello from ioctl\n");
             break;
+        case SET_DEV_MSG:
+            if(copy_from_user(dev_msg, (char *)arg, sizeof((char *)arg))){
+                return -EFAULT;
+            }
+            printk(KERN_ALERT "set dev msg: %s", dev_msg);
+            break;
+        case GET_DEV_MSG:
+            if(copy_to_user((char *)arg, dev_msg, sizeof(dev_msg))){
+                return -EFAULT;
+            }
+            printk(KERN_ALERT "get dev msg: %s", dev_msg);
+            break;
         default:
             return -ENOTTY;
     }
     return retval;
 }
 
-// static int onebyte_llseek(unsigned int fd, unsigned long offset_high, unsigned long offset_low, loff_t *result, unsigned int whence){
-//     loff_t offset = (loff_t) offset_high << 32 | offset_low;
-//     loff_t newpos;  
-
-//     switch(whence) {  
-//       case 0: /* SEEK_SET */  
-//         newpos = offset;  
-//         break;  
-  
-//       case 1: /* SEEK_CUR */  
-//         newpos = position + offset;  
-//         break;  
-  
-//       case 2: /* SEEK_END */  
-//         newpos = DEVICE_SIZE - 1 + offset;  
-//         break;  
-  
-//       default: /* can't happen */  
-//         return -EINVAL;  
-//     }  
-//     if ((newpos < 0) || (newpos > DEVICE_SIZE))  
-//         return -EINVAL;  
-  
-//     *result = newpos;  
-//     return newpos;  
-// }
 
 static int onebyte_init(void)
 {
@@ -213,6 +202,12 @@ static int onebyte_init(void)
           // return no memory error, negative signify a failure
          return -ENOMEM;
      }
+
+     dev_msg = kmalloc(DEV_MSG_SIZE, GFP_KERNEL);
+     if(!dev_msg){
+         onebyte_exit();
+         return -ENOMEM;
+     }
      // initialize the value to be X
     //  *onebyte_data = 'X';
      printk(KERN_ALERT "This is a onebyte device module\n");
@@ -226,6 +221,10 @@ static void onebyte_exit(void)
           // free the memory and assign the pointer to NULL
           kfree(onebyte_data);
           onebyte_data = NULL;
+     }
+     if(dev_msg){
+         kfree(dev_msg);
+         dev_msg = NULL;
      }
      // unregister the device
      unregister_chrdev(MAJOR_NUMBER, "onebyte");

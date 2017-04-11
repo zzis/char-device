@@ -2,9 +2,13 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-//needed for IO things. Attention that this is different from kernel mode int lcd; 
+//needed for IO things. Attention that this is different from kernel mode int lcd;
+
 #define SCULL_IOC_MAGIC 'k'
-#define SCULL_HELLO _IO(SCULL_IOC_MAGIC, 1) 
+#define SCULL_HELLO _IO(SCULL_IOC_MAGIC, 1)
+#define SET_DEV_MSG _IOW(SCULL_IOC_MAGIC, 2, *char)
+#define GET_DEV_MSG _IOR(SCULL_IOC_MAGIC, 3, *char)
+
 int lcd;
 void test() 
 { 
@@ -16,6 +20,24 @@ void test()
     printf("written = %d\n", k); 
     k = ioctl(lcd, SCULL_HELLO); 
     printf("result = %d\n", k); 
+
+    char *message = "This is a device message\n";
+    if(k = ioctl(lcd, SET_DEV_MSG, message)){
+        printf("ioctl set msg fail\n");
+        return ;
+    }
+    char user_msg = (char *)malloc(60);
+    if(!user_msg){
+        printf("malloc error\n");
+        return ;
+    }
+    if(k = ioctl(lcd, GET_DEV_MSG, user_msg)){
+        printf("ioctl get msg fail\n");
+        return ;
+    }
+    printf("user_msg is: %s \n", user_msg);
+    free(user_msg);
+
 } 
 
 int main(int argc, char **argv) 
