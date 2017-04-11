@@ -164,13 +164,13 @@ long onebyte_ioctl(struct file *filp, unsigned int cmd, unsigned long arg){
             printk(KERN_WARNING "hello from ioctl\n");
             break;
         case SET_DEV_MSG:
-            if(copy_from_user(dev_msg, (char *)arg, sizeof((char *)arg))){
+            if(copy_from_user(dev_msg, (char *)arg, DEV_MSG_SIZE)){
                 return -EFAULT;
             }
             printk(KERN_ALERT "set dev msg: %s", dev_msg);
             break;
         case GET_DEV_MSG:
-            if(copy_to_user((char *)arg, dev_msg, sizeof(dev_msg))){
+            if(copy_to_user((char *)arg, dev_msg, DEV_MSG_SIZE)){
                 return -EFAULT;
             }
             printk(KERN_ALERT "get dev msg: %s", dev_msg);
