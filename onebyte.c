@@ -7,6 +7,7 @@
 #include <linux/fs.h>
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
+#include <linux/file.h>
 #define MAJOR_NUMBER 61
 
 #define DEVICE_SIZE 4 * 1024 * 1024
