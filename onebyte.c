@@ -14,11 +14,11 @@
 #define DEVICE_SIZE 4 * 1024 * 1024
 #define SCULL_IOC_MAGIC 'k'
 #define SCULL_HELLO _IO(SCULL_IOC_MAGIC, 1)
-#define SET_DEV_MSG _IOW(SCULL_IOC_MAGIC, 2, *char)
-#define GET_DEV_MSG _IOR(SCULL_IOC_MAGIC, 3, *char)
+#define SET_DEV_MSG _IOW(SCULL_IOC_MAGIC, 2, char*)
+#define GET_DEV_MSG _IOR(SCULL_IOC_MAGIC, 3, char*)
 #define SCULL_IOC_MAXNR 3
 
-#define DEV_MSG_SIZE
+#define DEV_MSG_SIZE 60
  
 /* forward declaration */
 static int onebyte_open(struct inode *inode, struct file *filep);
@@ -146,7 +146,7 @@ static loff_t onebyte_llseek(struct file *filp, loff_t offset, int whence)
 }
 
 long onebyte_ioctl(struct file *filp, unsigned int cmd, unsigned long arg){
-    int err = 0, tmp;
+    int err = 0;
     int retval = 0;
 
     if(_IOC_TYPE(cmd) != SCULL_IOC_MAGIC) return -ENOTTY;

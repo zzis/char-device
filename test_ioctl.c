@@ -1,3 +1,4 @@
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -6,8 +7,8 @@
 
 #define SCULL_IOC_MAGIC 'k'
 #define SCULL_HELLO _IO(SCULL_IOC_MAGIC, 1)
-#define SET_DEV_MSG _IOW(SCULL_IOC_MAGIC, 2, *char)
-#define GET_DEV_MSG _IOR(SCULL_IOC_MAGIC, 3, *char)
+#define SET_DEV_MSG _IOW(SCULL_IOC_MAGIC, 2, char*)
+#define GET_DEV_MSG _IOR(SCULL_IOC_MAGIC, 3, char*)
 
 int lcd;
 void test() 
@@ -26,7 +27,7 @@ void test()
         printf("ioctl set msg fail\n");
         return ;
     }
-    char user_msg = (char *)malloc(60);
+    char *user_msg = (char *)malloc(60);
     if(!user_msg){
         printf("malloc error\n");
         return ;
