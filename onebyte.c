@@ -8,6 +8,8 @@
 #include <linux/proc_fs.h>
 #include <asm/uaccess.h>
 #define MAJOR_NUMBER 61
+
+#define DEVICE_SIZE 4 * 1024 * 1024
  
 /* forward declaration */
 static int onebyte_open(struct inode *inode, struct file *filep);
@@ -24,6 +26,7 @@ struct file_operations onebyte_fops = {
 };
 static char *onebyte_data = NULL;
 
+
 static int onebyte_open(struct inode *inode, struct file *filep)
 {
      return 0; // always successful
@@ -37,33 +40,64 @@ static int onebyte_release(struct inode *inode, struct file *filep)
 static ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t *f_pos)
 {    /*please complete the function on your own*/
 
-    if(copy_to_user(buf, onebyte_data, 1))
-    {
-        count = -EFAULT;
-    }
-    *f_pos += 1;
-    if(*f_pos > 1)
-    {
+    // if(copy_to_user(buf, onebyte_data, 1))
+    // {
+    //     count = -EFAULT;
+    // }
+    // *f_pos += 1;
+    // if(*f_pos > 1)
+    // {
+    //     return 0;
+    // }
+    // return 1;
+
+    if(*f_pos >= DEVICE_SIZE){
         return 0;
     }
-    return 1;
+    
+    if(count + *f_pos > DEVICE_SIZE){
+        count = DEVICE_SIZE - *f_pos;
+    }
+
+    if(copy_to_user(buf, onebyte_data + *f_pos, count)){
+        return -EFAULT;
+    }
+
+    *f_pos = *_pos + count;
+    return count;
 }
 
 static ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, loff_t *f_pos)
 {
      /*please complete the function on your own*/
-     if(*f_pos == 0) {
-         if(copy_from_user(onebyte_data, buf, 1))
-         {
-             return -EFAULT;
-         }
-         *f_pos += 1;
-         return 1;
-     } else {
-         //here should print error mesg
-         // ENOSPC      28  is defined in error.h means /* No space left on device */
+    //  if(*f_pos == 0) {
+    //      if(copy_from_user(onebyte_data, buf, 1))
+    //      {
+    //          return -EFAULT;
+    //      }
+    //      *f_pos += 1;
+    //      return 1;
+    //  } else {
+    //      //here should print error mesg
+    //      // ENOSPC      28  is defined in error.h means /* No space left on device */
+    //     return -ENOSPC;
+    //  }
+
+    if(*f_pos >= DEVICE_SIZE){
         return -ENOSPC;
-     }
+    }
+
+    if(count + *f_pos > DEVICE_SIZE){
+        count = DEVICE_SIZE - *f_pos;
+    }
+
+    if(copy_from_user(onebyte_data + *f_pos, buf, count)){
+        return -EFAULT;
+    }
+
+    *f_pos += count;
+    return count;
+
 }
 
 static int onebyte_init(void)
@@ -78,16 +112,16 @@ static int onebyte_init(void)
      // kmalloc is just like malloc, the second parameter is
 // the type of memory to be allocated.
      // To release the memory allocated by kmalloc, use kfree.
-     onebyte_data = kmalloc(sizeof(char), GFP_KERNEL);
+    //  onebyte_data = kmalloc(sizeof(char), GFP_KERNEL);
+    onebyte_data = kmalloc(DEVICE_SIZE, GFP_KERNEL);
      if (!onebyte_data) {
           onebyte_exit();
           // cannot allocate memory
-          // return no memory error, negative signify a
-     failure:
+          // return no memory error, negative signify a failure
          return -ENOMEM;
      }
      // initialize the value to be X
-     *onebyte_data = 'X';
+    //  *onebyte_data = 'X';
      printk(KERN_ALERT "This is a onebyte device module\n");
      return 0;
 }
