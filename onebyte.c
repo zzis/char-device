@@ -178,12 +178,16 @@ long onebyte_ioctl(struct file *filp, unsigned int cmd, unsigned long arg){
             break;
         case WR_DEV_MSG:
             char *tmp = kmalloc(DEV_MSG_SIZE, GFP_KERNEL);
-            if(copy_from_user(dev_msg, (char *)arg,  DEV_MSG_SIZE)){
+            if(copy_from_user(tmp, (char *)arg,  DEV_MSG_SIZE)){
                 return -EFAULT;
             }
+            
             if(copy_to_user((char *)arg, dev_msg, DEV_MSG_SIZE)){
                 return -EFAULT;
             }
+            strcpy(dev_msg, tmp);
+            printk(KERN_ALERT "dev_msg after _IOWR operation: %s\n", dev_msg);
+            kfree(tmp);
         default:
             return -ENOTTY;
     }

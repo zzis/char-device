@@ -34,10 +34,18 @@ void test()
         return ;
     }
     if(k = ioctl(lcd, GET_DEV_MSG, user_msg)){
-        printf("ioctl get msg fail\n");
+        printf("_IOR ioctl get msg fail\n");
         return ;
     }
-    printf("user_msg is: %s \n", user_msg);
+    printf("_IOR user_msg is: %s \n", user_msg);
+
+    char new_user_msg = "This is new message!\n";
+    strcpy(user_msg, new_user_msg);
+    if(k = ioctl(lcd, WR_DEV_MSG, user_msg)){
+        printf("_IOWR ioctl get msg fail\n");
+        return ;
+    }
+    printf("_IOWR user_msg is: %s \n", user_msg);
     free(user_msg);
 
 } 
