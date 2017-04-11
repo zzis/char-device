@@ -1,2 +1,2 @@
-/root/os/assignment3/char_device/onebyte.ko
-/root/os/assignment3/char_device/onebyte.o
+/root/os/assignment4/char-device/onebyte.ko
+/root/os/assignment4/char-device/onebyte.o

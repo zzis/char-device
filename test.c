@@ -1,3 +1,5 @@
+#include <unistd.h>
+#include <string.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <fcntl.h> 
@@ -13,28 +15,27 @@ void test() {
     printf("written = %d\n", k); 
     k = lseek(lcd, 0, SEEK_END); 
     printf("lseek = %d\n", k); 
-    k = lseek(lcd, ‐4, SEEK_END); 
+    k = lseek(lcd, -4, SEEK_END); 
     printf("lseek = %d\n", k); 
-    k = lseek(lcd, ‐4, ‐1); 
+    k = lseek(lcd, -4, -1); 
     printf("lseek = %d\n", k); 
 } 
 void initial(char i) { 
     char s[10]; 
     memset(s, i, sizeof(s)); 
-    write(lcd, s, sizeof(s)); 
-￼
- 
+    write(lcd, s, sizeof(s));  
     char c[20] = "";
     int k = lseek(lcd, 0, SEEK_SET); 
     printf("lseek = %d\n", k); 
 } 
 int main(int argc, char **argv) {
     lcd = open("/dev/onebyte", O_RDWR); 
-    if (lcd == ‐1) { 
-        printk("unable to open onebyte"); 
+    if (lcd == -1) { 
+        printf("unable to open onebyte"); 
         exit(EXIT_FAILURE); 
         } 
-    initial(‘1’); 
+    initial('1'); 
     test(); 
-    close(lcd); return 0; 
+    close(lcd); 
+    return 0; 
 } 
