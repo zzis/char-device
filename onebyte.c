@@ -149,6 +149,7 @@ static loff_t onebyte_llseek(struct file *filp, loff_t offset, int whence)
 long onebyte_ioctl(struct file *filp, unsigned int cmd, unsigned long arg){
     int err = 0;
     int retval = 0;
+    char *tmp = NULL;
 
     if(_IOC_TYPE(cmd) != SCULL_IOC_MAGIC) return -ENOTTY;
     if(_IOC_NR(cmd) > SCULL_IOC_MAXNR) return -ENOTTY;
@@ -177,7 +178,7 @@ long onebyte_ioctl(struct file *filp, unsigned int cmd, unsigned long arg){
             printk(KERN_ALERT "get dev msg: %s", dev_msg);
             break;
         case WR_DEV_MSG:
-            char *tmp = kmalloc(DEV_MSG_SIZE, GFP_KERNEL);
+            tmp = kmalloc(DEV_MSG_SIZE, GFP_KERNEL);
             if(copy_from_user(tmp, (char *)arg,  DEV_MSG_SIZE)){
                 return -EFAULT;
             }
@@ -188,6 +189,7 @@ long onebyte_ioctl(struct file *filp, unsigned int cmd, unsigned long arg){
             strcpy(dev_msg, tmp);
             printk(KERN_ALERT "dev_msg after _IOWR operation: %s\n", dev_msg);
             kfree(tmp);
+            break;
         default:
             return -ENOTTY;
     }
