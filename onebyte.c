@@ -42,6 +42,8 @@ struct file_operations onebyte_fops = {
 static char *onebyte_data = NULL;
 static char *dev_msg = NULL;
 
+static int current_size = 0;
+
 
 static int onebyte_open(struct inode *inode, struct file *filep)
 {
@@ -67,12 +69,12 @@ static ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t 
     // }
     // return 1;
 
-    if(*f_pos >= DEVICE_SIZE){
+    if(*f_pos >= current_size){
         return 0;
     }
     
-    if(count + *f_pos > DEVICE_SIZE){
-        count = DEVICE_SIZE - *f_pos;
+    if(count + *f_pos > current_size){
+        count = current_size - *f_pos;
     }
 
     if(copy_to_user(buf, onebyte_data + *f_pos, count)){
@@ -114,6 +116,7 @@ static ssize_t onebyte_write(struct file *filep, const char *buf, size_t count, 
     *f_pos += count;
     //print the size written
     // printk(KERN_ALERT "The writen size is %d", *f_pos);
+    current_size += count;
 
     return count;
 
@@ -133,13 +136,13 @@ static loff_t onebyte_llseek(struct file *filp, loff_t offset, int whence)
         break;  
   
       case 2: /* SEEK_END */  
-        newpos = DEVICE_SIZE -1 + offset;  
+        newpos = current_size -1 + offset;  
         break;  
   
       default: /* can't happen */  
         return -EINVAL;  
     }  
-    if ((newpos<0) || (newpos>DEVICE_SIZE))  
+    if ((newpos<0) || (newpos>current_size))  
         return -EINVAL;  
   
     filp->f_pos = newpos;  
