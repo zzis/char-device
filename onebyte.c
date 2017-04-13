@@ -69,7 +69,7 @@ static ssize_t onebyte_read(struct file *filep, char *buf, size_t count, loff_t 
     // }
     // return 1;
 
-    if(*f_pos >= current_size){
+    if(*f_pos >= current_size){ 
         return 0;
     }
     
