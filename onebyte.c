@@ -220,6 +220,7 @@ static int onebyte_init(void)
           // return no memory error, negative signify a failure
          return -ENOMEM;
      }
+     memset(onebyte_data, 0, DEVICE_SIZE);
 
      dev_msg = kmalloc(DEV_MSG_SIZE, GFP_KERNEL);
      if(!dev_msg){
@@ -244,6 +245,7 @@ static void onebyte_exit(void)
          kfree(dev_msg);
          dev_msg = NULL;
      }
+     current_size = 0;
      // unregister the device
      unregister_chrdev(MAJOR_NUMBER, "onebyte");
      printk(KERN_ALERT "Onebyte device module is unloaded\n");
